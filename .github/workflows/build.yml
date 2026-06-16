@@ -37,7 +37,26 @@ jobs:
           sed -i "s/^loader_version=.*/loader_version=$LOADER/" gradle.properties
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon 2>&1
+        run: |
+          ./gradlew build --no-daemon 2>&1 || {
+            echo ""
+            echo "=== BUILD FAILED — dumping yarn mappings for diagnostic ==="
+            MAPPINGS=$(find /home/runner/.gradle/caches/fabric-loom -name "mappings.tiny" 2>/dev/null | head -1)
+            if [ -n "$MAPPINGS" ]; then
+              echo "Mappings file: $MAPPINGS"
+              echo ""
+              echo "=== Methods with 'screen' or 'gui' in name or descriptor ==="
+              grep -i "screen\|displaygui\|openscreen\|setscreen" "$MAPPINGS" | head -80
+              echo ""
+              echo "=== All method entries (first 200) ==="
+              grep $'^\t''m\t' "$MAPPINGS" | head -200
+            else
+              echo "mappings.tiny not found in fabric-loom cache"
+              echo "Contents of fabric-loom cache:"
+              find /home/runner/.gradle/caches/fabric-loom -type f 2>/dev/null | head -30
+            fi
+            exit 1
+          }
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
