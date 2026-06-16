@@ -40,11 +40,11 @@ public abstract class MixinMinecraft {
         if (mc.currentScreen != null) { clickGuiKeyDown = hudEditorKeyDown = false; return; }
 
         boolean clickGui = Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
-        if (clickGui && !clickGuiKeyDown) mc.displayGuiScreen(new ClickGuiScreen());
+        if (clickGui && !clickGuiKeyDown) mc.setScreen(new ClickGuiScreen());
         clickGuiKeyDown = clickGui;
 
         boolean hudEditor = Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
-        if (hudEditor && !hudEditorKeyDown) mc.displayGuiScreen(new HudEditorScreen());
+        if (hudEditor && !hudEditorKeyDown) mc.setScreen(new HudEditorScreen());
         hudEditorKeyDown = hudEditor;
     }
 
