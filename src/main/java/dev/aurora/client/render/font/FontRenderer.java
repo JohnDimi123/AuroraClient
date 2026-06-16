@@ -1,14 +1,15 @@
 package dev.aurora.client.render.font;
 
-import net.minecraft.client.texture.DynamicTexture;
 import org.lwjgl.opengl.GL11;
 
+import org.lwjgl.BufferUtils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 
 /**
  * A lightweight texture-atlas font renderer.
@@ -24,7 +25,7 @@ public final class FontRenderer {
     private static final int LAST_CHAR = 255;
     private static final int PADDING = 2;
 
-    private final DynamicTexture texture;
+    private final int glTextureId;
     private final int textureWidth;
     private final int textureHeight;
     private final int[] charX = new int[LAST_CHAR + 1];
@@ -68,7 +69,7 @@ public final class FontRenderer {
         }
         g.dispose();
 
-        this.texture = new DynamicTexture(atlas);
+        this.glTextureId = uploadAtlas(atlas);
     }
 
     /** @return pixel width of the string at scale 1. */
@@ -95,7 +96,7 @@ public final class FontRenderer {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getGlId());
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, glTextureId);
 
         float a = (color >> 24 & 0xFF) / 255f;
         if (a == 0) a = 1f;
@@ -133,6 +134,26 @@ public final class FontRenderer {
         int g = (int) ((color >> 8 & 0xFF) * 0.25f);
         int b = (int) ((color & 0xFF) * 0.25f);
         return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    private static int uploadAtlas(BufferedImage img) {
+        int id = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        int w = img.getWidth(), h = img.getHeight();
+        int[] pixels = img.getRGB(0, 0, w, h, null, 0, w);
+        ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 4);
+        for (int px : pixels) {
+            buf.put((byte) ((px >> 16) & 0xFF));
+            buf.put((byte) ((px >> 8) & 0xFF));
+            buf.put((byte) (px & 0xFF));
+            buf.put((byte) ((px >> 24) & 0xFF));
+        }
+        buf.flip();
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w, h, 0,
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+        return id;
     }
 
     private static int nextPow2(int v) {

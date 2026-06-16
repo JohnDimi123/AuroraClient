@@ -13,8 +13,7 @@ import dev.aurora.client.util.ClickTracker;
 import dev.aurora.client.util.PerformanceMonitor;
 import dev.aurora.client.util.SessionStats;
 import net.fabricmc.api.ClientModInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  * Aurora Client — main entrypoint and service locator.
@@ -33,7 +32,7 @@ public final class Aurora implements ClientModInitializer {
 
     public static final String NAME = "Aurora";
     public static final String VERSION = "1.0.0";
-    public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
+    public static final Logger LOGGER = Logger.getLogger(NAME);
 
     /** Global singleton; assigned in {@link #onInitializeClient()}. */
     public static Aurora INSTANCE;
@@ -55,7 +54,7 @@ public final class Aurora implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         INSTANCE = this;
-        LOGGER.info("Initialising {} v{}", NAME, VERSION);
+        LOGGER.info("Initialising " + NAME + " v" + VERSION);
 
         // Core services
         eventBus = new EventBus();
@@ -90,7 +89,7 @@ public final class Aurora implements ClientModInitializer {
 
         notificationManager.push(NAME + " v" + VERSION, "Client loaded successfully",
                 NotificationManager.Type.SUCCESS);
-        LOGGER.info("{} initialised with {} modules", NAME, moduleManager.getModules().size());
+        LOGGER.info(NAME + " initialised with " + moduleManager.getModules().size() + " modules");
     }
 
     // ---- service accessors --------------------------------------------------
