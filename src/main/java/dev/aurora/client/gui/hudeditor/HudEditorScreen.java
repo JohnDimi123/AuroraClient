@@ -80,13 +80,11 @@ public final class HudEditorScreen extends Screen {
     }
 
     @Override
-    public void keyTyped(char chr, int keyCode) {
+    public void keyPressed(char chr, int keyCode) {
         if (keyCode == Keyboard.KEY_G) { showGrid = !showGrid; return; }
         if (keyCode == Keyboard.KEY_ESCAPE) {
             Aurora.INSTANCE.getConfigManager().save();
-            MinecraftClient.getInstance().openScreen(null);
-            return;
         }
-        try { super.keyTyped(chr, keyCode); } catch (Exception ignored) {}
+        try { super.keyPressed(chr, keyCode); } catch (Exception ignored) {}
     }
 }

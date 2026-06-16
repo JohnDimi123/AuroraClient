@@ -96,7 +96,7 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public void keyTyped(char chr, int keyCode) {
+    public void keyPressed(char chr, int keyCode) {
         if (searchFocused) {
             if (keyCode == Keyboard.KEY_BACK && searchQuery.length() > 0) {
                 searchQuery = searchQuery.substring(0, searchQuery.length() - 1);
@@ -108,14 +108,8 @@ public final class ClickGuiScreen extends Screen {
             return;
         }
         if (keyCode == Keyboard.KEY_ESCAPE) {
-            close();
-            return;
+            Aurora.INSTANCE.getConfigManager().save();
         }
-        try { super.keyTyped(chr, keyCode); } catch (Exception ignored) {}
-    }
-
-    private void close() {
-        Aurora.INSTANCE.getConfigManager().save();
-        MinecraftClient.getInstance().openScreen(null);
+        try { super.keyPressed(chr, keyCode); } catch (Exception ignored) {}
     }
 }
