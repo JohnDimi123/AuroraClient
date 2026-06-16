@@ -58,7 +58,7 @@ public abstract class MixinMinecraft {
         FpsBooster booster = FpsBooster.getActive();
         if (booster == null || !booster.isDynamicFps()) return;
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (!mc.isWindowFocused()) {
+        if (!org.lwjgl.opengl.Display.isActive()) {
             cir.setReturnValue(booster.getUnfocusedFps());
         }
     }

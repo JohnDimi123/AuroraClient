@@ -33,8 +33,8 @@ public final class ToggleSneak extends Module {
     }
 
     private void applyState() {
-        if (mc.options != null) {
-            mc.options.keySneak.setPressed(sneaking);
+        if (mc.player != null) {
+            mc.player.setSneaking(sneaking);
         }
     }
 }

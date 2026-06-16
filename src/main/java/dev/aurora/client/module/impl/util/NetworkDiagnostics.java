@@ -8,6 +8,7 @@ import dev.aurora.client.module.Category;
 import dev.aurora.client.module.Module;
 import dev.aurora.client.network.NetworkManager;
 import dev.aurora.client.render.Render2D;
+import dev.aurora.client.render.font.FontRenderer;
 
 /**
  * Surfaces network statistics gathered by {@link NetworkManager}: ping, jitter,
@@ -23,7 +24,7 @@ public final class NetworkDiagnostics extends Module {
     public void onRenderHud(RenderHudEvent event) {
         Theme theme = Aurora.INSTANCE.getThemeManager().getActive();
         NetworkManager net = Aurora.INSTANCE.getNetworkManager();
-        var font = Aurora.INSTANCE.getFontManager().regular();
+        FontRenderer font = Aurora.INSTANCE.getFontManager().regular();
         String[] lines = {
                 "Ping: " + net.getPing() + " ms",
                 "Jitter: " + net.getJitter() + " ms",

@@ -2,6 +2,7 @@ package dev.aurora.client.setting;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import java.util.function.Supplier;
 
 /** An ARGB colour setting, stored as a packed int. */
 public final class ColorSetting extends Setting<Integer> {
@@ -9,6 +10,9 @@ public final class ColorSetting extends Setting<Integer> {
         super(name, description, argb);
     }
     public int get() { return getValue(); }
+    @Override public ColorSetting visibleWhen(Supplier<Boolean> condition) {
+        super.visibleWhen(condition); return this;
+    }
     @Override public JsonElement toJson() { return new JsonPrimitive(getValue()); }
     @Override public void fromJson(JsonElement e) { setValue(e.getAsInt()); }
 }

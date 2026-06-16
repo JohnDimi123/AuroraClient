@@ -4,6 +4,7 @@ import dev.aurora.client.Aurora;
 import dev.aurora.client.gui.theme.Theme;
 import dev.aurora.client.render.Render2D;
 import dev.aurora.client.render.font.FontRenderer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 
@@ -12,8 +13,7 @@ import org.lwjgl.input.Keyboard;
  * <p>
  * Renders every registered {@link HudElement} in place with a selection outline,
  * lets the user drag elements freely, snaps to a configurable grid and to other
- * elements' edges, and adjusts scale with the scroll wheel. Layout changes are
- * persisted by the config system on close.
+ * elements' edges. Layout changes are persisted by the config system on close.
  */
 public final class HudEditorScreen extends Screen {
 
@@ -37,7 +37,6 @@ public final class HudEditorScreen extends Screen {
             for (int gy = 0; gy < height; gy += GRID) Render2D.rect(0, gy, width, 1, gridColor);
         }
 
-        // Render each element with an editor outline.
         for (HudElement element : Aurora.INSTANCE.getHudManager().getElements()) {
             element.renderElement();
             int outline = element == selected ? theme.accent() : theme.textMuted();
@@ -45,32 +44,28 @@ public final class HudEditorScreen extends Screen {
                     Math.max(element.getWidth(), 4), Math.max(element.getHeight(), 4), 1, outline);
         }
 
-        // Help text.
-        font.drawWithShadow("HUD Editor - drag to move, scroll to scale, G toggles grid, ESC saves & exits",
+        font.drawWithShadow("HUD Editor - drag to move, G toggles grid, ESC saves & exits",
                 8, height - 14, theme.text());
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        selected = Aurora.INSTANCE.getHudManager().elementAt(mouseX, mouseY);
+    public void mouseClicked(int mouseX, int mouseY, int button) {
+        selected = Aurora.INSTANCE.getHudManager().elementAt((double) mouseX, (double) mouseY);
         if (selected != null) {
             dragOffsetX = mouseX - selected.getX();
             dragOffsetY = mouseY - selected.getY();
         }
-        return true;
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (selected == null) return true;
+    public void mouseDragged(int mouseX, int mouseY, int button, long timeSinceLastClick) {
+        if (selected == null) return;
         double nx = mouseX - dragOffsetX;
         double ny = mouseY - dragOffsetY;
 
-        // Snap to grid.
         nx = Math.round(nx / GRID) * GRID;
         ny = Math.round(ny / GRID) * GRID;
 
-        // Snap to other elements' edges.
         for (HudElement other : Aurora.INSTANCE.getHudManager().getElements()) {
             if (other == selected) continue;
             if (Math.abs(nx - other.getX()) < SNAP_DISTANCE) nx = other.getX();
@@ -79,32 +74,19 @@ public final class HudEditorScreen extends Screen {
             if (Math.abs(nx - otherRight) < SNAP_DISTANCE) nx = otherRight;
         }
 
-        // Clamp to screen.
         nx = Math.max(0, Math.min(width - selected.getWidth(), nx));
         ny = Math.max(0, Math.min(height - selected.getHeight(), ny));
         selected.setPosition(nx, ny);
-        return true;
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        HudElement target = Aurora.INSTANCE.getHudManager().elementAt(mouseX, mouseY);
-        if (target != null) {
-            target.setScale(target.getScale() + (float) amount * 0.1f);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == Keyboard.KEY_G) { showGrid = !showGrid; return true; }
+    public void keyTyped(char chr, int keyCode) {
+        if (keyCode == Keyboard.KEY_G) { showGrid = !showGrid; return; }
         if (keyCode == Keyboard.KEY_ESCAPE) {
             Aurora.INSTANCE.getConfigManager().save();
-            if (mc != null) mc.openScreen(null);
-            return true;
+            MinecraftClient.getInstance().openScreen(null);
+            return;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        try { super.keyTyped(chr, keyCode); } catch (Exception ignored) {}
     }
-
-    @Override public boolean shouldPause() { return false; }
 }

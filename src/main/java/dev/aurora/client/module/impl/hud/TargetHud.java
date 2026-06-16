@@ -33,10 +33,11 @@ public final class TargetHud extends HudModule {
         Render2D.roundedRect(0, 0, w, h, 4, theme.surface());
 
         String name = target instanceof PlayerEntity
-                ? ((PlayerEntity) target).getGameProfile().getName() : target.getName();
+                ? ((PlayerEntity) target).getGameProfile().getName()
+                : target.getName().asFormattedString();
         font().drawWithShadow(name, 6, 5, theme.text());
 
-        float pct = target.getHealth() / target.getMaximumHealth();
+        float pct = target.getHealth() / target.getMaxHealth();
         Render2D.roundedRect(6, 20, w - 12, 6, 2, theme.background());
         Render2D.roundedRect(6, 20, (w - 12) * pct, 6, 2,
                 pct > 0.5f ? theme.positive() : theme.negative());

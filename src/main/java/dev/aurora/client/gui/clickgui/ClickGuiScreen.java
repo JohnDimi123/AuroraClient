@@ -6,6 +6,7 @@ import dev.aurora.client.gui.theme.Theme;
 import dev.aurora.client.module.Category;
 import dev.aurora.client.render.Render2D;
 import dev.aurora.client.render.font.FontRenderer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 
@@ -34,7 +35,7 @@ public final class ClickGuiScreen extends Screen {
         }
     }
 
-    @Override protected void init() { /* layout fixed in constructor */ }
+    @Override public void init() { /* layout fixed in constructor */ }
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
@@ -42,15 +43,12 @@ public final class ClickGuiScreen extends Screen {
         FontRenderer title = Aurora.INSTANCE.getFontManager().title();
         FontRenderer font = Aurora.INSTANCE.getFontManager().regular();
 
-        // Dim/blur backdrop (approximated with a translucent fill for portability).
         Render2D.rect(0, 0, width, height, 0x99000000);
 
-        // Title bar.
         Render2D.rect(0, 0, width, 32, theme.background());
         title.drawWithShadow("Aurora", 12, 4, theme.accent());
         font.drawWithShadow("v" + Aurora.VERSION, 12 + title.getWidth("Aurora") + 6, 14, theme.textMuted());
 
-        // Search box.
         double sx = width - 220, sy = 6, sw = 150, sh = 20;
         Render2D.roundedRect(sx, sy, sw, sh, 4, theme.surface());
         if (searchFocused) Render2D.outline(sx, sy, sw, sh, 1, theme.accent());
@@ -58,12 +56,10 @@ public final class ClickGuiScreen extends Screen {
         font.draw(shown, (float) sx + 6, (float) sy + 6,
                 searchQuery.isEmpty() && !searchFocused ? theme.textMuted() : theme.text());
 
-        // Theme button.
         double tx = width - 60, ty = 6;
         Render2D.roundedRect(tx, ty, 50, 20, 4, theme.surface());
         font.drawCentered(theme.getName(), (float) tx + 25, (float) ty + 6, theme.text());
 
-        // Panels.
         for (CategoryPanel panel : panels) {
             panel.setSearch(searchQuery);
             panel.render(mouseX, mouseY, font);
@@ -71,66 +67,55 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Search focus toggle.
+    public void mouseClicked(int mouseX, int mouseY, int button) {
         double sx = width - 220, sy = 6, sw = 150, sh = 20;
         searchFocused = mouseX >= sx && mouseX <= sx + sw && mouseY >= sy && mouseY <= sy + sh;
 
-        // Theme button.
         double tx = width - 60, ty = 6;
         if (mouseX >= tx && mouseX <= tx + 50 && mouseY >= ty && mouseY <= ty + 20) {
             Aurora.INSTANCE.getThemeManager().cycle();
-            return true;
+            return;
         }
 
         for (CategoryPanel panel : panels) {
-            if (panel.mouseClicked(mouseX, mouseY, button)) return true;
+            if (panel.mouseClicked((double) mouseX, (double) mouseY, button)) return;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public void mouseReleased(int mouseX, int mouseY, int button) {
         for (CategoryPanel panel : panels) panel.mouseReleased();
-        return super.mouseReleased(mouseX, mouseY, button);
+        super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        for (CategoryPanel panel : panels) panel.mouseDragged(mouseX, mouseY);
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+    public void mouseDragged(int mouseX, int mouseY, int button, long timeSinceLastClick) {
+        for (CategoryPanel panel : panels) panel.mouseDragged((double) mouseX, (double) mouseY);
+        super.mouseDragged(mouseX, mouseY, button, timeSinceLastClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public void keyTyped(char chr, int keyCode) {
         if (searchFocused) {
             if (keyCode == Keyboard.KEY_BACK && searchQuery.length() > 0) {
                 searchQuery = searchQuery.substring(0, searchQuery.length() - 1);
             } else if (keyCode == Keyboard.KEY_RETURN) {
                 searchFocused = false;
+            } else if (chr >= 32 && chr < 127) {
+                searchQuery += chr;
             }
-            return true;
+            return;
         }
         if (keyCode == Keyboard.KEY_ESCAPE) {
             close();
-            return true;
+            return;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (searchFocused && chr >= 32 && chr < 127) {
-            searchQuery += chr;
-            return true;
-        }
-        return super.charTyped(chr, modifiers);
+        try { super.keyTyped(chr, keyCode); } catch (Exception ignored) {}
     }
 
     private void close() {
         Aurora.INSTANCE.getConfigManager().save();
-        if (mc != null) mc.openScreen(null);
+        MinecraftClient.getInstance().openScreen(null);
     }
-
-    @Override public boolean shouldPause() { return false; }
 }

@@ -22,7 +22,7 @@ public abstract class MixinClientPlayNetworkHandler {
     @Inject(method = "onChatMessage", at = @At("HEAD"))
     private void aurora$onChat(ChatMessageS2CPacket packet, CallbackInfo ci) {
         try {
-            String text = packet.getMessage().getString();
+            String text = packet.getMessage().asFormattedString();
             Aurora.INSTANCE.getEventBus().post(new ChatReceiveEvent(text));
             Aurora.INSTANCE.getEventBus().post(
                     new PacketEvent(packet, PacketEvent.Direction.INBOUND));

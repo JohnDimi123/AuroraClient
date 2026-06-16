@@ -85,7 +85,7 @@ public final class ConfigManager {
         try (Writer w = new FileWriter(target)) {
             GSON.toJson(root, w);
         } catch (IOException e) {
-            Aurora.LOGGER.error("Failed to save config '{}'", activeProfile, e);
+            Aurora.LOGGER.severe("Failed to save config '" + activeProfile + "': " + e);
         }
     }
 
@@ -121,7 +121,7 @@ public final class ConfigManager {
                 Aurora.INSTANCE.getHudManager().fromJson(root.getAsJsonObject("hud"));
             }
         } catch (Exception e) {
-            Aurora.LOGGER.error("Failed to load config '{}'", activeProfile, e);
+            Aurora.LOGGER.severe("Failed to load config '" + activeProfile + "': " + e);
         }
     }
 

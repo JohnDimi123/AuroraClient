@@ -18,7 +18,7 @@ public final class PotionStatusHud extends HudModule {
     @Override protected void draw(float partialTicks) {
         if (mc.player == null) { setSize(0, 0); return; }
         Theme theme = Aurora.INSTANCE.getThemeManager().getActive();
-        Collection<StatusEffectInstance> effects = mc.player.getStatusEffects();
+        Collection<StatusEffectInstance> effects = mc.player.getActivePotionEffects();
         if (effects.isEmpty()) { setSize(0, 0); return; }
 
         int lineH = font().getHeight() + 2;
@@ -26,7 +26,7 @@ public final class PotionStatusHud extends HudModule {
         int i = 0;
         for (StatusEffectInstance e : effects) {
             String name = net.minecraft.client.resource.language.I18n.translate(
-                    e.getEffectType().getTranslationKey());
+                    e.getPotion().getTranslationKey());
             String line = name + " " + format(e.getDuration());
             maxW = Math.max(maxW, font().getWidth(line) + 8);
         }
@@ -34,7 +34,7 @@ public final class PotionStatusHud extends HudModule {
         Render2D.roundedRect(0, 0, maxW, lineH * effects.size() + 4, 3, theme.surface());
         for (StatusEffectInstance e : effects) {
             String name = net.minecraft.client.resource.language.I18n.translate(
-                    e.getEffectType().getTranslationKey());
+                    e.getPotion().getTranslationKey());
             font().drawWithShadow(name + " " + format(e.getDuration()), 4, 3 + i * lineH, theme.text());
             i++;
         }

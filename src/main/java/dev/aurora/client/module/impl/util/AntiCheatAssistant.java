@@ -8,6 +8,7 @@ import dev.aurora.client.gui.theme.Theme;
 import dev.aurora.client.module.Category;
 import dev.aurora.client.module.Module;
 import dev.aurora.client.render.Render2D;
+import dev.aurora.client.render.font.FontRenderer;
 import dev.aurora.client.setting.NumberSetting;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public final class AntiCheatAssistant extends Module {
         if (alerts.isEmpty()) return;
 
         Theme theme = Aurora.INSTANCE.getThemeManager().getActive();
-        var font = Aurora.INSTANCE.getFontManager().regular();
+        FontRenderer font = Aurora.INSTANCE.getFontManager().regular();
         int lineH = font.getHeight() + 2;
         int shown = Math.min(5, alerts.size());
         double w = 220, h = lineH * shown + 18;

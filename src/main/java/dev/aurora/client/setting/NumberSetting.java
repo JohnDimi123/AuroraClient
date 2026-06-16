@@ -2,6 +2,7 @@ package dev.aurora.client.setting;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import java.util.function.Supplier;
 
 /** A bounded numeric (double) setting with min, max and step. */
 public final class NumberSetting extends Setting<Double> {
@@ -29,6 +30,9 @@ public final class NumberSetting extends Setting<Double> {
         super.setValue(Math.max(min, Math.min(max, snapped)));
     }
 
+    @Override public NumberSetting visibleWhen(Supplier<Boolean> condition) {
+        super.visibleWhen(condition); return this;
+    }
     @Override public JsonElement toJson() { return new JsonPrimitive(getValue()); }
     @Override public void fromJson(JsonElement e) { setValue(e.getAsDouble()); }
 }

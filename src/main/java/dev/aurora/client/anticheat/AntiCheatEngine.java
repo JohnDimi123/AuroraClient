@@ -70,7 +70,10 @@ public final class AntiCheatEngine {
         if (mc.world == null || mc.player == null) return;
 
         // Sample publicly visible player state.
-        for (PlayerEntity player : mc.world.getPlayers()) {
+        @SuppressWarnings("unchecked")
+        java.util.List<PlayerEntity> worldPlayers =
+                (java.util.List<PlayerEntity>) mc.world.playerEntities;
+        for (PlayerEntity player : worldPlayers) {
             if (player == mc.player) continue;
             String name = player.getGameProfile().getName();
             PlayerObservation obs = observations.computeIfAbsent(name, PlayerObservation::new);
