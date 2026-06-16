@@ -40,19 +40,23 @@ jobs:
         run: |
           ./gradlew build --no-daemon 2>&1 || {
             echo ""
-            echo "=== BUILD FAILED — dumping yarn mappings for diagnostic ==="
+            echo "=== BUILD FAILED — targeted yarn mappings diagnostic ==="
             MAPPINGS=$(find /home/runner/.gradle/caches/fabric-loom -name "mappings.tiny" 2>/dev/null | head -1)
             if [ -n "$MAPPINGS" ]; then
               echo "Mappings file: $MAPPINGS"
+              # Determine obfuscated names from the 3-column flat tiny format
+              MC_OBF=$(grep "MinecraftClient$" "$MAPPINGS" | awk '{print $2}' | head -1)
+              SC_OBF=$(grep "/screen/Screen$" "$MAPPINGS" | awk '{print $2}' | head -1)
+              echo "MinecraftClient official name: $MC_OBF"
+              echo "Screen official name: $SC_OBF"
               echo ""
-              echo "=== Methods with 'screen' or 'gui' in name or descriptor ==="
-              grep -i "screen\|displaygui\|openscreen\|setscreen" "$MAPPINGS" | head -80
+              echo "=== ALL MinecraftClient (${MC_OBF}) methods ==="
+              grep "^METHOD	${MC_OBF}	" "$MAPPINGS"
               echo ""
-              echo "=== All method entries (first 200) ==="
-              grep $'^\t''m\t' "$MAPPINGS" | head -200
+              echo "=== MinecraftClient methods that take Screen (${SC_OBF}) ==="
+              grep "^METHOD	${MC_OBF}	.*L${SC_OBF};" "$MAPPINGS"
             else
               echo "mappings.tiny not found in fabric-loom cache"
-              echo "Contents of fabric-loom cache:"
               find /home/runner/.gradle/caches/fabric-loom -type f 2>/dev/null | head -30
             fi
             exit 1
